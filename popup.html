@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flash Guardian Settings</title>
+  <title>Halo Settings</title>
   <style>
     * {
       margin: 0;
@@ -12,7 +12,7 @@
     }
 
     body {
-      width: 360px;
+      width: 400px;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: linear-gradient(135deg, #b8f50a 0%, #00d4ff 100%);
@@ -21,6 +21,7 @@
 
     .header {
       padding: 20px;
+      padding-bottom: 12px;
       margin-bottom: 0;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
@@ -86,6 +87,7 @@
     .view-container {
       display: none;
       padding: 20px;
+      padding-top: 12px;
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
     }
@@ -393,7 +395,7 @@
   <div class="header">
     <div class="header-content">
       <div class="title-section">
-        <h1>Flash Guardian</h1>
+        <h1>Halo</h1>
         <p id="headerSubtitle">Photosensitive Content Protection</p>
       </div>
       <div class="header-icons">
@@ -460,15 +462,15 @@
     <div class="summarizer-content">
       <textarea id="textInput" placeholder="Paste article text here..." style="width: 100%; min-height: 150px; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; resize: vertical; box-sizing: border-box; margin-bottom: 15px;"></textarea>
 
-      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <select id="summaryType" style="flex: 1; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; cursor: pointer;">
+      <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+        <select id="summaryType" style="flex: 1; padding: 14px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; background: #fff; cursor: pointer; height: 48px;">
           <option value="quick">Quick Summary</option>
           <option value="bullets">Bullet Points</option>
         </select>
-        <button id="generateBtn" style="flex: 1; background: linear-gradient(135deg, #b8f50a 0%, #00d4ff 100%); color: #1a1a1a; border: none; padding: 14px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 700; box-shadow: 0 4px 12px rgba(184, 245, 10, 0.3); transition: all 0.3s ease;">
+        <button id="generateBtn" style="flex: 1; background: linear-gradient(135deg, #b8f50a 0%, #00d4ff 100%); color: #1a1a1a; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 700; box-shadow: 0 4px 12px rgba(184, 245, 10, 0.3); transition: all 0.3s ease;">
           Generate
         </button>
-        <button id="clearBtn" style="background: rgba(255, 255, 255, 0.9); color: #4a4a4a; border: 2px solid rgba(0, 0, 0, 0.1); padding: 14px 20px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <button id="clearBtn" style="flex: 0 0 auto; background: rgba(255, 255, 255, 0.9); color: #4a4a4a; border: 2px solid rgba(0, 0, 0, 0.1); padding: 14px 20px; border-radius: 12px; cursor: pointer; font-size: 15px; font-weight: 600; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
           Clear
         </button>
       </div>

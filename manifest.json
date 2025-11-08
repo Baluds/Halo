@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Flash Guardian",
+  "name": "Halo",
   "version": "1.0.0",
   "description": "Protects photosensitive users by detecting and warning about flashing content in videos",
   "permissions": [

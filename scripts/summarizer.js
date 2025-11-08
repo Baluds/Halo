@@ -1,5 +1,5 @@
 /**
- * Flash Guardian - Text Summarizer Content Script
+ * Halo - Text Summarizer Content Script
  * Extracts article text from web pages for summarization
  */
 
@@ -139,4 +139,4 @@ function findMainContentByTextDensity() {
   return bestElement;
 }
 
-console.log('[Flash Guardian Summarizer] Content script loaded');
+console.log('[Halo Summarizer] Content script loaded');

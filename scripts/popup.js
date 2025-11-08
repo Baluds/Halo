@@ -1,5 +1,5 @@
 /**
- * Flash Guardian Popup Script
+ * Halo Popup Script
  * Handles settings and statistics display
  */
 
@@ -111,7 +111,7 @@ function updateStatusDisplay(enabled) {
 function updateStatsDisplay() {
   chrome.storage.local.get(['stats'], (data) => {
     if (data.stats) {
-      console.log('[Flash Guardian Popup] Updating stats display:', data.stats);
+      console.log('[Halo Popup] Updating stats display:', data.stats);
       document.getElementById('videosMonitored').textContent = data.stats.videosMonitored || 0;
       document.getElementById('warningsIssued').textContent = data.stats.warningsIssued || 0;
       document.getElementById('flashesDetected').textContent = data.stats.flashesDetected || 0;
@@ -125,7 +125,7 @@ setInterval(updateStatsDisplay, 500); // Update twice per second for better resp
 // Also listen for storage changes for immediate updates
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (changes.stats) {
-    console.log('[Flash Guardian Popup] Storage changed:', changes.stats.newValue);
+    console.log('[Halo Popup] Storage changed:', changes.stats.newValue);
     updateStatsDisplay();
   }
 });
@@ -168,7 +168,7 @@ document.getElementById('resetStats').addEventListener('click', () => {
         button.style.color = '#fff';
       }, 1500);
 
-      console.log('[Flash Guardian] Statistics reset successfully');
+      console.log('[Halo] Statistics reset successfully');
     });
   });
 });

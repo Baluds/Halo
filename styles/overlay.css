@@ -1,9 +1,9 @@
 /**
- * Flash Guardian Warning Overlay Styles
+ * Halo Warning Overlay Styles
  * Modern, Professional Design
  */
 
-#flash-guardian-overlay {
+#halo-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -28,7 +28,7 @@
   }
 }
 
-.flash-guardian-content {
+.halo-content {
   background: #ffffff;
   border: 2px solid #e0e0e0;
   border-radius: 16px;
@@ -50,7 +50,7 @@
   }
 }
 
-.flash-guardian-icon {
+.halo-icon {
   font-size: 64px;
   margin-bottom: 20px;
   animation: pulse 2s ease-in-out infinite;
@@ -65,7 +65,7 @@
   }
 }
 
-.flash-guardian-content h2 {
+.halo-content h2 {
   color: #000000;
   font-size: 32px;
   margin: 0 0 20px 0;
@@ -73,26 +73,26 @@
   letter-spacing: -0.5px;
 }
 
-.flash-guardian-message {
+.halo-message {
   color: #212121;
   font-size: 20px;
   margin: 0 0 15px 0;
   line-height: 1.6;
 }
 
-.flash-guardian-message strong {
+.halo-message strong {
   color: #000000;
   font-weight: 700;
 }
 
-.flash-guardian-info {
+.halo-info {
   color: #616161;
   font-size: 16px;
   margin: 0 0 30px 0;
   line-height: 1.6;
 }
 
-.flash-guardian-stats {
+.halo-stats {
   background: #f5f5f5;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -105,19 +105,19 @@
   font-size: 14px;
 }
 
-.flash-guardian-stats div {
+.halo-stats div {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.flash-guardian-stats strong {
+.halo-stats strong {
   color: #212121;
   font-weight: 600;
   font-size: 16px;
 }
 
-.flash-guardian-buttons {
+.halo-buttons {
   display: flex;
   gap: 15px;
   margin: 30px 0 20px 0;
@@ -165,7 +165,7 @@
   background: rgba(0, 0, 0, 0.08);
 }
 
-.flash-guardian-wcag {
+.halo-wcag {
   color: #9e9e9e;
   font-size: 12px;
   margin: 20px 0 0 0;
@@ -174,20 +174,20 @@
 
 /* Responsive design for mobile */
 @media (max-width: 600px) {
-  .flash-guardian-content {
+  .halo-content {
     padding: 30px 20px;
     margin: 20px;
   }
 
-  .flash-guardian-content h2 {
+  .halo-content h2 {
     font-size: 24px;
   }
 
-  .flash-guardian-message {
+  .halo-message {
     font-size: 16px;
   }
 
-  .flash-guardian-buttons {
+  .halo-buttons {
     flex-direction: column;
   }
 
@@ -198,9 +198,9 @@
 
 /* Accessibility: Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-  #flash-guardian-overlay,
-  .flash-guardian-content,
-  .flash-guardian-icon {
+  #halo-overlay,
+  .halo-content,
+  .halo-icon {
     animation: none;
   }
 }

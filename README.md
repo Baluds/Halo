@@ -1,4 +1,4 @@
-# Flash Guardian
+# Halo
 
 A dual-purpose Chrome browser extension for accessibility:
 1. **Flash Protection**: Protects people with photosensitive epilepsy by detecting flashing content in videos
@@ -7,7 +7,7 @@ A dual-purpose Chrome browser extension for accessibility:
 ## What It Does
 
 ### Flash Protection
-Flash Guardian monitors videos on YouTube, TikTok, Twitter/X, Instagram, and Twitch. When it detects rapid flashing (3 or more flashes per second), it immediately pauses the video and shows a warning overlay, helping protect photosensitive users from potentially harmful content.
+Halo monitors videos on YouTube, TikTok, Twitter/X, Instagram, and Twitch. When it detects rapid flashing (3 or more flashes per second), it immediately pauses the video and shows a warning overlay, helping protect photosensitive users from potentially harmful content.
 
 ### Text Summarizer
 Condenses long articles and blog posts into easy-to-read summaries using Google's Gemini AI. Helps users with ADHD/ADD quickly grasp key information without reading lengthy content.
@@ -67,7 +67,7 @@ The extension monitors videos using these steps:
 
 ### Flash Protection (Default View)
 
-1. **Browse normally** - Flash Guardian runs automatically on supported sites
+1. **Browse normally** - Halo runs automatically on supported sites
 2. **Watch videos** - Detection starts when any video begins playing
 3. **Get warnings** - If flashing is detected (≥3 flashes/second):
    - Video pauses immediately
@@ -85,7 +85,7 @@ The extension monitors videos using these steps:
 ### Text Summarizer
 
 **First Time Setup:**
-1. Click the Flash Guardian icon in your toolbar
+1. Click the Halo icon in your toolbar
 2. Click the ⚙️ settings icon at the top
 3. Choose your AI provider:
    - **Google Gemini** (Recommended): Fast, high-quality summaries
@@ -98,7 +98,7 @@ The extension monitors videos using these steps:
 **Using the Summarizer:**
 1. Navigate to any article or blog post
 2. Select and copy the text you want to summarize (Cmd/Ctrl+A then Cmd/Ctrl+C)
-3. Click the Flash Guardian icon
+3. Click the Halo icon
 4. Make sure you're in the Text Summarizer view (📝 icon)
 5. Paste the text into the text box (Cmd/Ctrl+V)
 6. Choose your summary length:
@@ -116,11 +116,11 @@ The extension monitors videos using these steps:
 
 Open DevTools (F12) → Console to see detection activity:
 ```
-[Flash Guardian] Content script loaded
-[Flash Guardian] Found 1 video(s) on page
-[Flash Guardian] Initialized detector for video
-[Flash Guardian] Started monitoring video
-[Flash Guardian] Detection state reset
+[Halo] Content script loaded
+[Halo] Found 1 video(s) on page
+[Halo] Initialized detector for video
+[Halo] Started monitoring video
+[Halo] Detection state reset
 ```
 
 Built for HackUmass 2025
