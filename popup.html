@@ -27,8 +27,8 @@
     }
 
     .header h1 {
-      font-size: 24px;
-      color: #1976d2;
+      font-size: 28px;
+      color: #000000;
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -37,13 +37,13 @@
     }
 
     .header p {
-      font-size: 13px;
-      color: #757575;
+      font-size: 15px;
+      color: #000000;
     }
 
     .status {
-      background: #e8f5e9;
-      border: 2px solid #4caf50;
+      background: #fffde6;
+      border: 2px solid #faee21;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
@@ -59,10 +59,10 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: #4caf50;
+      background: #faee21;
       display: inline-block;
       margin-right: 8px;
-      box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+      box-shadow: 0 0 10px rgba(250, 238, 33, 0.5);
       animation: pulse 2s ease-in-out infinite;
     }
 
@@ -82,14 +82,14 @@
     }
 
     .status h2 {
-      font-size: 18px;
+      font-size: 20px;
       margin-bottom: 10px;
-      color: #212121;
+      color: #000000;
     }
 
     .status p {
-      font-size: 13px;
-      color: #616161;
+      font-size: 15px;
+      color: #000000;
     }
 
     .settings {
@@ -112,15 +112,15 @@
     }
 
     .setting-item label {
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
-      color: #212121;
+      color: #000000;
       display: block;
     }
 
     .setting-item p {
-      font-size: 12px;
-      color: #757575;
+      font-size: 14px;
+      color: #000000;
       line-height: 1.5;
     }
 
@@ -161,7 +161,7 @@
     }
 
     input:checked + .slider {
-      background-color: #1976d2;
+      background-color: #faee21;
     }
 
     input:checked + .slider:before {
@@ -177,8 +177,8 @@
     }
 
     .stats h3 {
-      font-size: 14px;
-      color: #1976d2;
+      font-size: 16px;
+      color: #000000;
       margin-bottom: 12px;
     }
 
@@ -187,8 +187,8 @@
       justify-content: space-between;
       padding: 8px 0;
       border-bottom: 1px solid #e0e0e0;
-      font-size: 13px;
-      color: #616161;
+      font-size: 15px;
+      color: #000000;
     }
 
     .stat-row:last-child {
@@ -196,22 +196,22 @@
     }
 
     .stat-value {
-      color: #1976d2;
+      color: #000000;
       font-weight: 600;
     }
 
     .info {
-      background: #fff3e0;
-      border: 1px solid #ffe0b2;
+      background: #f5f5f5;
+      border: 1px solid #e0e0e0;
       border-radius: 8px;
       padding: 12px;
-      font-size: 12px;
-      color: #e65100;
+      font-size: 14px;
+      color: #000000;
       line-height: 1.6;
     }
 
     .info strong {
-      color: #d84315;
+      color: #000000;
     }
 
     .footer {
@@ -222,9 +222,9 @@
     }
 
     .footer a {
-      color: #1976d2;
+      color: #000000;
       text-decoration: none;
-      font-size: 12px;
+      font-size: 14px;
     }
 
     .footer a:hover {
@@ -234,7 +234,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>⚠️ Flash Guardian</h1>
+    <h1>Flash Guardian</h1>
     <p>Photosensitive Content Protection</p>
   </div>
 
@@ -256,24 +256,6 @@
         </label>
       </div>
       <p>Automatically detect and warn about flashing content in videos</p>
-    </div>
-
-    <div class="setting-item">
-      <div class="setting-header">
-        <label>Auto-Pause Videos</label>
-        <label class="toggle">
-          <input type="checkbox" id="autoPauseToggle" checked>
-          <span class="slider"></span>
-        </label>
-      </div>
-      <p>Automatically pause videos when flashing is detected</p>
-    </div>
-
-    <div class="setting-item">
-      <div class="setting-header">
-        <label>Sensitivity: Medium</label>
-      </div>
-      <p>Detection sensitivity based on WCAG 2.1 standards (≥3 flashes/second)</p>
     </div>
   </div>
 
@@ -300,7 +282,7 @@
   </div>
 
   <div style="text-align: center; margin-top: 15px;">
-    <button id="resetStats" style="background: #333; color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+    <button id="resetStats" style="background: #000000; color: #fff; border: 1px solid #000000; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 14px;">
       Reset Statistics
     </button>
   </div>

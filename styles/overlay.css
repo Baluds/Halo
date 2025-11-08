@@ -9,7 +9,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(255, 255, 255, 0.98);
+  background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
@@ -66,7 +66,7 @@
 }
 
 .flash-guardian-content h2 {
-  color: #d32f2f;
+  color: #000000;
   font-size: 32px;
   margin: 0 0 20px 0;
   font-weight: 700;
@@ -81,7 +81,7 @@
 }
 
 .flash-guardian-message strong {
-  color: #d32f2f;
+  color: #000000;
   font-weight: 700;
 }
 
@@ -147,22 +147,22 @@
 }
 
 .fg-btn-primary {
-  background: #1976d2;
-  color: white;
+  background: #faee21;
+  color: #000000;
 }
 
 .fg-btn-primary:hover {
-  background: #1565c0;
+  background: #f0d600;
 }
 
 .fg-btn-danger {
   background: transparent;
-  color: #d32f2f;
-  border: 2px solid #d32f2f;
+  color: #000000;
+  border: 2px solid #000000;
 }
 
 .fg-btn-danger:hover {
-  background: rgba(211, 47, 47, 0.08);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .flash-guardian-wcag {

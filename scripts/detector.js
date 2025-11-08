@@ -8,8 +8,11 @@
  */
 
 class FlashDetector {
-  constructor(video) {
+  constructor(video, videoId, warnedVideosSet, getProtectionEnabled) {
     this.video = video;
+    this.videoId = videoId;
+    this.warnedVideosSet = warnedVideosSet; // Reference to global warned videos set
+    this.getProtectionEnabled = getProtectionEnabled; // Function to check if protection is enabled
     this.canvas = document.createElement('canvas');
     this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
@@ -35,6 +38,9 @@ class FlashDetector {
     // Statistics
     this.totalFlashes = 0;
     this.maxFlashesPerSecond = 0;
+
+    // Error tracking
+    this.corsErrorLogged = false;
   }
 
   /**
@@ -92,6 +98,12 @@ class FlashDetector {
    * Analyze a single frame for flash detection
    */
   analyzeFrame() {
+    // Stop analyzing if protection is disabled
+    if (!this.getProtectionEnabled()) {
+      this.stop();
+      return;
+    }
+
     if (!this.video || this.video.paused || this.video.ended) {
       return;
     }
@@ -107,81 +119,98 @@ class FlashDetector {
       // Capture current video frame
       this.canvas.width = Math.min(this.video.videoWidth, 640);
       this.canvas.height = Math.min(this.video.videoHeight, 360);
-      this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
 
-      const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
-      const currentTime = Date.now();
+      // Check if canvas is tainted (CORS issue)
+      try {
+        this.ctx.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+        const imageData = this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+        const currentTime = Date.now();
 
-      // Calculate luminance and red saturation
-      const currentLuminance = this.calculateLuminance(imageData);
-      const currentRedSaturation = this.calculateRedSaturation(imageData);
+        // Calculate luminance and red saturation
+        const currentLuminance = this.calculateLuminance(imageData);
+        const currentRedSaturation = this.calculateRedSaturation(imageData);
 
-      // Increment analyzed frame counter
-      this.analyzedFrameCount++;
+        // Increment analyzed frame counter
+        this.analyzedFrameCount++;
 
-      // Skip warmup frames to avoid false positives during video initialization
-      if (this.analyzedFrameCount <= this.WARMUP_FRAMES) {
+        // Skip warmup frames to avoid false positives during video initialization
+        if (this.analyzedFrameCount <= this.WARMUP_FRAMES) {
+          this.prevLuminance = currentLuminance;
+          this.prevRedSaturation = currentRedSaturation;
+          requestAnimationFrame(() => this.analyzeFrame());
+          return;
+        }
+
+        // Ignore very dark frames (loading screens, fade to black, etc.)
+        if (currentLuminance < this.MIN_BRIGHTNESS || (this.prevLuminance !== null && this.prevLuminance < this.MIN_BRIGHTNESS)) {
+          this.prevLuminance = currentLuminance;
+          this.prevRedSaturation = currentRedSaturation;
+          requestAnimationFrame(() => this.analyzeFrame());
+          return;
+        }
+
+        if (this.prevLuminance !== null) {
+          // Check for general flash (luminance change)
+          const luminanceChange = Math.abs(currentLuminance - this.prevLuminance);
+          const relativeLuminanceChange = luminanceChange / Math.max(this.prevLuminance, 0.01);
+
+          // Additional check: both current and previous luminance must be significant for a valid flash
+          const bothFramesBright = currentLuminance > this.MIN_BRIGHTNESS && this.prevLuminance > this.MIN_BRIGHTNESS;
+          const absoluteChangeSignificant = luminanceChange > 0.1; // At least 10% absolute change
+
+          if (relativeLuminanceChange > this.LUMINANCE_THRESHOLD && bothFramesBright && absoluteChangeSignificant) {
+            this.flashTimestamps.push(currentTime);
+            this.totalFlashes++;
+          }
+
+          // Check for red flash
+          const redChange = Math.abs(currentRedSaturation - this.prevRedSaturation);
+          if (redChange > this.RED_THRESHOLD && bothFramesBright) {
+            this.redFlashTimestamps.push(currentTime);
+          }
+
+          // Remove old timestamps outside detection window
+          this.flashTimestamps = this.flashTimestamps.filter(
+            t => currentTime - t <= this.DETECTION_WINDOW
+          );
+          this.redFlashTimestamps = this.redFlashTimestamps.filter(
+            t => currentTime - t <= this.DETECTION_WINDOW
+          );
+
+          // Update max flashes per second
+          this.maxFlashesPerSecond = Math.max(
+            this.maxFlashesPerSecond,
+            this.flashTimestamps.length
+          );
+
+          // Trigger warning if threshold exceeded
+          if (this.flashTimestamps.length >= this.FLASH_FREQUENCY) {
+            console.log('[Flash Guardian] THRESHOLD EXCEEDED! Flashes in last second:', this.flashTimestamps.length);
+            this.triggerWarning('general', this.flashTimestamps.length);
+          } else if (this.redFlashTimestamps.length >= this.FLASH_FREQUENCY) {
+            console.log('[Flash Guardian] RED FLASH THRESHOLD EXCEEDED! Red flashes in last second:', this.redFlashTimestamps.length);
+            this.triggerWarning('red', this.redFlashTimestamps.length);
+          }
+
+          // Log flash activity for debugging
+          if (this.flashTimestamps.length > 0) {
+            console.log('[Flash Guardian] Flash detected! Total in last second:', this.flashTimestamps.length, 'Total overall:', this.totalFlashes);
+          }
+        }
+
         this.prevLuminance = currentLuminance;
         this.prevRedSaturation = currentRedSaturation;
-        requestAnimationFrame(() => this.analyzeFrame());
-        return;
+
+      } catch (corsError) {
+        // CORS/Security error - video cannot be analyzed (different origin)
+        // This is expected for some videos, silently skip this frame
+        // Suppressed logging to avoid console spam
+        this.corsErrorLogged = true;
       }
-
-      // Ignore very dark frames (loading screens, fade to black, etc.)
-      if (currentLuminance < this.MIN_BRIGHTNESS || (this.prevLuminance !== null && this.prevLuminance < this.MIN_BRIGHTNESS)) {
-        this.prevLuminance = currentLuminance;
-        this.prevRedSaturation = currentRedSaturation;
-        requestAnimationFrame(() => this.analyzeFrame());
-        return;
-      }
-
-      if (this.prevLuminance !== null) {
-        // Check for general flash (luminance change)
-        const luminanceChange = Math.abs(currentLuminance - this.prevLuminance);
-        const relativeLuminanceChange = luminanceChange / Math.max(this.prevLuminance, 0.01);
-
-        // Additional check: both current and previous luminance must be significant for a valid flash
-        const bothFramesBright = currentLuminance > this.MIN_BRIGHTNESS && this.prevLuminance > this.MIN_BRIGHTNESS;
-        const absoluteChangeSignificant = luminanceChange > 0.1; // At least 10% absolute change
-
-        if (relativeLuminanceChange > this.LUMINANCE_THRESHOLD && bothFramesBright && absoluteChangeSignificant) {
-          this.flashTimestamps.push(currentTime);
-          this.totalFlashes++;
-        }
-
-        // Check for red flash
-        const redChange = Math.abs(currentRedSaturation - this.prevRedSaturation);
-        if (redChange > this.RED_THRESHOLD && bothFramesBright) {
-          this.redFlashTimestamps.push(currentTime);
-        }
-
-        // Remove old timestamps outside detection window
-        this.flashTimestamps = this.flashTimestamps.filter(
-          t => currentTime - t <= this.DETECTION_WINDOW
-        );
-        this.redFlashTimestamps = this.redFlashTimestamps.filter(
-          t => currentTime - t <= this.DETECTION_WINDOW
-        );
-
-        // Update max flashes per second
-        this.maxFlashesPerSecond = Math.max(
-          this.maxFlashesPerSecond,
-          this.flashTimestamps.length
-        );
-
-        // Trigger warning if threshold exceeded
-        if (this.flashTimestamps.length >= this.FLASH_FREQUENCY) {
-          this.triggerWarning('general', this.flashTimestamps.length);
-        } else if (this.redFlashTimestamps.length >= this.FLASH_FREQUENCY) {
-          this.triggerWarning('red', this.redFlashTimestamps.length);
-        }
-      }
-
-      this.prevLuminance = currentLuminance;
-      this.prevRedSaturation = currentRedSaturation;
 
     } catch (error) {
-      console.error('[Flash Guardian] Frame analysis error:', error);
+      // Other unexpected errors
+      console.error('[Flash Guardian] Unexpected error during frame analysis:', error);
     }
 
     // Continue analyzing
@@ -201,28 +230,44 @@ class FlashDetector {
     // Pause video immediately
     this.video.pause();
 
-    // Report warning to popup
+    // Report warning to popup - wrap in try-catch for extension context errors
     console.log('[Flash Guardian] Sending warningIssued message to background');
-    chrome.runtime.sendMessage({
-      action: 'updateStats',
-      stat: 'warningIssued'
-    }).then(response => {
-      console.log('[Flash Guardian] warningIssued message sent, response:', response);
-    }).catch(error => {
-      console.error('[Flash Guardian] Error sending warningIssued message:', error);
-    });
+    try {
+      chrome.runtime.sendMessage({
+        action: 'updateStats',
+        stat: 'warningIssued'
+      }).then(response => {
+        console.log('[Flash Guardian] warningIssued message sent, response:', response);
+      }).catch(error => {
+        if (error.message && error.message.includes('Extension context invalidated')) {
+          console.log('[Flash Guardian] Extension was reloaded, cannot send warningIssued message');
+        } else {
+          console.error('[Flash Guardian] Error sending warningIssued message:', error);
+        }
+      });
+    } catch (error) {
+      console.log('[Flash Guardian] Cannot send warningIssued message, extension context may be invalid');
+    }
 
-    // Report flashes detected
+    // Report flashes detected - wrap in try-catch for extension context errors
     console.log('[Flash Guardian] Sending flashDetected message to background, count:', this.totalFlashes);
-    chrome.runtime.sendMessage({
-      action: 'updateStats',
-      stat: 'flashDetected',
-      count: this.totalFlashes
-    }).then(response => {
-      console.log('[Flash Guardian] flashDetected message sent, response:', response);
-    }).catch(error => {
-      console.error('[Flash Guardian] Error sending flashDetected message:', error);
-    });
+    try {
+      chrome.runtime.sendMessage({
+        action: 'updateStats',
+        stat: 'flashDetected',
+        count: this.totalFlashes
+      }).then(response => {
+        console.log('[Flash Guardian] flashDetected message sent, response:', response);
+      }).catch(error => {
+        if (error.message && error.message.includes('Extension context invalidated')) {
+          console.log('[Flash Guardian] Extension was reloaded, cannot send flashDetected message');
+        } else {
+          console.error('[Flash Guardian] Error sending flashDetected message:', error);
+        }
+      });
+    } catch (error) {
+      console.log('[Flash Guardian] Cannot send flashDetected message, extension context may be invalid');
+    }
 
     // Dispatch custom event for warning UI
     const warningEvent = new CustomEvent('flashDetected', {
@@ -235,9 +280,26 @@ class FlashDetector {
       }
     });
 
-    document.dispatchEvent(warningEvent);
+    // Show the warning overlay
+    this.showWarningOverlay(type, flashCount);
+  }
 
-    console.warn(`[Flash Guardian] ${type === 'red' ? 'Red flash' : 'Flash'} detected: ${flashCount} flashes in 1 second`);
+  /**
+   * Show warning overlay without incrementing stats
+   * Used when video was already warned but user seeks back
+   */
+  showWarningOverlay(type, flashCount) {
+    const warningEvent = new CustomEvent('flashDetected', {
+      detail: {
+        type: type,
+        flashCount: flashCount,
+        maxFlashesPerSecond: this.maxFlashesPerSecond,
+        totalFlashes: this.totalFlashes,
+        timestamp: this.video.currentTime
+      }
+    });
+
+    document.dispatchEvent(warningEvent);
   }
 
   /**
@@ -290,13 +352,121 @@ class FlashDetector {
   console.log('[Flash Guardian] Content script loaded');
 
   const detectors = new Map();
+  const visitedVideos = new Set(); // Track unique videos to prevent duplicate counting
+  const warnedVideos = new Set(); // Track videos that have already shown warnings (prevents inflation from seeking)
+  let protectionEnabled = true; // Default to enabled
+  let storageLoaded = false; // Track if storage has been loaded
+
+  // Load both enabled state and visited videos before initializing
+  Promise.all([
+    new Promise(resolve => {
+      chrome.storage.sync.get(['enabled'], (data) => {
+        protectionEnabled = data.enabled !== false;
+        console.log('[Flash Guardian] Protection enabled:', protectionEnabled);
+        resolve();
+      });
+    }),
+    new Promise(resolve => {
+      chrome.storage.local.get(['visitedVideos'], (data) => {
+        if (data.visitedVideos && Array.isArray(data.visitedVideos)) {
+          data.visitedVideos.forEach(videoId => visitedVideos.add(videoId));
+          console.log('[Flash Guardian] Loaded', visitedVideos.size, 'previously visited videos');
+        }
+        resolve();
+      });
+    })
+  ]).then(() => {
+    storageLoaded = true;
+    console.log('[Flash Guardian] Storage loaded, ready to initialize');
+    // Now find and monitor videos
+    findAndMonitorVideos();
+  });
+
+  /**
+   * Get video identifier from URL (for YouTube)
+   */
+  function getVideoId() {
+    // For YouTube, extract video ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoId = urlParams.get('v');
+
+    // Only return a valid video ID if we're on a watch page
+    // Don't count preview videos on homepage or other pages
+    if (videoId && window.location.pathname.includes('/watch')) {
+      return videoId;
+    }
+
+    // Return null for non-watch pages (homepage, search, etc.)
+    return null;
+  }
 
   /**
    * Initialize detector for a video element
    */
   function initializeDetector(video) {
-    // Skip if already monitoring
-    if (detectors.has(video)) return;
+    // Don't initialize if protection is disabled
+    if (!protectionEnabled) {
+      console.log('[Flash Guardian] Protection disabled, skipping video initialization');
+      return;
+    }
+
+    // CRITICAL: Don't initialize until storage is loaded
+    if (!storageLoaded) {
+      console.log('[Flash Guardian] Storage not loaded yet, deferring initialization');
+      return;
+    }
+
+    // Get the current video source (URL or src attribute)
+    const currentSrc = video.currentSrc || video.src;
+
+    // For YouTube, use the video ID from URL instead of video src
+    const videoId = getVideoId();
+
+    // Don't process videos on non-watch pages (homepage, search, etc.)
+    if (!videoId) {
+      console.log('[Flash Guardian] Not on a watch page, skipping video initialization');
+      return;
+    }
+
+    // If no source yet, wait for it
+    if (!currentSrc) {
+      return;
+    }
+
+    // Check if this is a new video by comparing sources
+    const previousSrc = video.dataset.flashGuardianSrc;
+    const previousVideoId = video.dataset.flashGuardianVideoId;
+    const isNewVideo = (previousSrc !== currentSrc) || (previousVideoId !== videoId);
+
+    console.log('[Flash Guardian] initializeDetector called:', {
+      videoId,
+      previousVideoId,
+      isNewVideo,
+      hasDetector: detectors.has(video),
+      alreadyVisited: visitedVideos.has(videoId)
+    });
+
+    // If video element already has a detector
+    if (detectors.has(video)) {
+      // If it's the same video, don't reinitialize
+      if (!isNewVideo) {
+        console.log('[Flash Guardian] Same video, skipping initialization');
+        return;
+      }
+
+      // New video in same element - stop old detector and create new one
+      console.log('[Flash Guardian] New video detected in existing element');
+      const oldDetector = detectors.get(video);
+      oldDetector.stop();
+      detectors.delete(video);
+    }
+
+    // Additional guard: If this exact videoId has already been processed, skip
+    // This handles the case where initializeDetector is called twice in rapid succession
+    if (visitedVideos.has(videoId) && video.dataset.flashGuardianVideoId === videoId) {
+      console.log('[Flash Guardian] Video already processed and counted, skipping. ID:', videoId);
+      return;
+    }
 
     // Wait for video metadata to load
     if (video.readyState < 2) {
@@ -304,22 +474,84 @@ class FlashDetector {
       return;
     }
 
-    const detector = new FlashDetector(video);
+    // CRITICAL: Mark the video as processed BEFORE creating detector
+    // This prevents double-counting if initializeDetector is called twice rapidly
+    video.dataset.flashGuardianSrc = currentSrc;
+    video.dataset.flashGuardianVideoId = videoId;
+
+    const detector = new FlashDetector(video, videoId, warnedVideos, () => protectionEnabled);
     detectors.set(video, detector);
 
-    // Report video monitored to popup
-    console.log('[Flash Guardian] Sending videoMonitored message to background');
-    chrome.runtime.sendMessage({
-      action: 'updateStats',
-      stat: 'videoMonitored'
-    }).then(response => {
-      console.log('[Flash Guardian] videoMonitored message sent, response:', response);
-    }).catch(error => {
-      console.error('[Flash Guardian] Error sending videoMonitored message:', error);
-    });
+    console.log('[Flash Guardian] Created new detector for video ID:', videoId, 'visitedVideos size:', visitedVideos.size);
+
+    // Report video monitored to popup (only for unique videos never seen before)
+    const alreadyVisited = visitedVideos.has(videoId);
+
+    if (!alreadyVisited) {
+      // Add to set IMMEDIATELY to prevent double-counting if called twice rapidly
+      visitedVideos.add(videoId);
+      console.log('[Flash Guardian] New unique video detected, ID:', videoId, 'Total unique videos:', visitedVideos.size);
+
+      // Save visited videos to storage FIRST for persistence
+      chrome.storage.local.set({ visitedVideos: Array.from(visitedVideos) }, () => {
+        console.log('[Flash Guardian] Saved visited videos to storage, size:', visitedVideos.size);
+
+        // THEN send the message to update stats
+        try {
+          chrome.runtime.sendMessage({
+            action: 'updateStats',
+            stat: 'videoMonitored'
+          }).then(response => {
+            console.log('[Flash Guardian] videoMonitored message sent successfully, response:', response);
+          }).catch(error => {
+            if (error && error.message && error.message.includes('Extension context invalidated')) {
+              console.warn('[Flash Guardian] Extension was reloaded, cannot send message');
+            } else {
+              console.error('[Flash Guardian] Error sending videoMonitored message:', error);
+            }
+          });
+        } catch (error) {
+          console.warn('[Flash Guardian] Cannot send message, extension context may be invalid:', error);
+        }
+      });
+    } else {
+      console.log('[Flash Guardian] Video already visited, not counting again. ID:', videoId, 'Total videos in set:', visitedVideos.size);
+    }
+
+    setupVideoEventListeners(video, detector);
+
+    // If video is already playing, start detection immediately (only if protection enabled)
+    if (!video.paused && protectionEnabled) {
+      console.log('[Flash Guardian] Video already playing, starting detection');
+      detector.start();
+    }
+  }
+
+  /**
+   * Setup event listeners for a video element
+   */
+  function setupVideoEventListeners(video, detector) {
+    // Check if already set up to avoid duplicate listeners
+    if (video.dataset.flashGuardianListenersSetup === 'true') {
+      return;
+    }
+    video.dataset.flashGuardianListenersSetup = 'true';
 
     // Start detection when video plays
     video.addEventListener('play', () => {
+      // Only start detection if protection is enabled
+      if (!protectionEnabled) {
+        console.log('[Flash Guardian] Protection disabled, not starting detection');
+        return;
+      }
+
+      // If playing from the beginning (first 3 seconds), reset warning
+      if (video.currentTime < 3) {
+        console.log('[Flash Guardian] Video playing from beginning, resetting warning flag');
+        detector.warningShown = false;
+        detector.totalFlashes = 0;
+        detector.maxFlashesPerSecond = 0;
+      }
       detector.start();
     });
 
@@ -331,6 +563,14 @@ class FlashDetector {
     // Reset detection state when seeking to avoid false positives
     video.addEventListener('seeking', () => {
       detector.resetDetectionState();
+
+      // If seeking backwards or to the beginning, allow warning to show again
+      if (video.currentTime < 10) {
+        console.log('[Flash Guardian] Seeking to early part of video, resetting warning flag');
+        detector.warningShown = false;
+        detector.totalFlashes = 0;
+        detector.maxFlashesPerSecond = 0;
+      }
     });
 
     // Clean up when video ends
@@ -338,28 +578,35 @@ class FlashDetector {
       detector.stop();
     });
 
-    console.log('[Flash Guardian] Initialized detector for video:', video);
+    console.log('[Flash Guardian] Setup event listeners for video:', video);
   }
 
   /**
    * Find and monitor all video elements
    */
   function findAndMonitorVideos() {
+    // Don't initialize until storage is loaded
+    if (!storageLoaded) {
+      console.log('[Flash Guardian] Waiting for storage to load before monitoring videos');
+      return;
+    }
+
     const videos = document.querySelectorAll('video');
     console.log(`[Flash Guardian] Found ${videos.length} video(s) on page`);
     videos.forEach(video => initializeDetector(video));
   }
 
-  // Initial scan
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', findAndMonitorVideos);
-  } else {
-    findAndMonitorVideos();
-  }
+  // Note: Initial scan is now called from Promise.all().then() above after storage loads
 
   // Watch for dynamically added videos (e.g., YouTube/TikTok)
+  // Throttle to avoid excessive calls
+  let observerTimeout;
   const observer = new MutationObserver(() => {
-    findAndMonitorVideos();
+    if (observerTimeout) return;
+    observerTimeout = setTimeout(() => {
+      findAndMonitorVideos();
+      observerTimeout = null;
+    }, 500); // Wait 500ms before checking again
   });
 
   observer.observe(document.body, {
@@ -369,7 +616,49 @@ class FlashDetector {
 
   // Create warning overlay when flash is detected
   document.addEventListener('flashDetected', (event) => {
+    // Only show warning if protection is enabled
+    if (!protectionEnabled) {
+      console.log('[Flash Guardian] Warning suppressed - protection is disabled');
+      return;
+    }
     showWarningOverlay(event.detail);
+  });
+
+  // Listen for messages from popup (e.g., enable/disable, reset stats)
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'enable') {
+      console.log('[Flash Guardian] Protection enabled');
+      protectionEnabled = true;
+      // Start all detectors if videos are playing
+      detectors.forEach(detector => {
+        if (!detector.video.paused) {
+          detector.start();
+        }
+      });
+    } else if (request.action === 'disable') {
+      console.log('[Flash Guardian] Protection disabled');
+      protectionEnabled = false;
+      // Stop all detectors
+      detectors.forEach(detector => detector.stop());
+
+      // Hide any visible warning overlay
+      const overlay = document.getElementById('flash-guardian-overlay');
+      if (overlay) {
+        overlay.style.display = 'none';
+      }
+    } else if (request.action === 'resetStats') {
+      console.log('[Flash Guardian] Clearing visited videos cache and warned videos');
+      // Clear the visited videos set so videos can be counted again
+      visitedVideos.clear();
+      // Clear the warned videos set so warnings can be issued again
+      warnedVideos.clear();
+      // Also clear from storage
+      chrome.storage.local.set({ visitedVideos: [] }, () => {
+        console.log('[Flash Guardian] Cleared visited videos from storage');
+      });
+    }
+    sendResponse({ success: true });
+    return true;
   });
 
   /**
@@ -402,7 +691,7 @@ class FlashDetector {
               Continue Anyway (Not Recommended)
             </button>
             <button id="flash-guardian-close" class="fg-btn fg-btn-primary">
-              Close Video
+              Pause Video
             </button>
           </div>
           <p class="flash-guardian-wcag">
