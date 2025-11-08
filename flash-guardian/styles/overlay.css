@@ -1,0 +1,206 @@
+/**
+ * Flash Guardian Warning Overlay Styles
+ * Modern, Professional Design
+ */
+
+#flash-guardian-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2147483647; /* Maximum z-index to ensure it's on top */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.flash-guardian-content {
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 600px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.flash-guardian-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.flash-guardian-content h2 {
+  color: #d32f2f;
+  font-size: 32px;
+  margin: 0 0 20px 0;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.flash-guardian-message {
+  color: #212121;
+  font-size: 20px;
+  margin: 0 0 15px 0;
+  line-height: 1.6;
+}
+
+.flash-guardian-message strong {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+.flash-guardian-info {
+  color: #616161;
+  font-size: 16px;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.flash-guardian-stats {
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  color: #757575;
+  font-size: 14px;
+}
+
+.flash-guardian-stats div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flash-guardian-stats strong {
+  color: #212121;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.flash-guardian-buttons {
+  display: flex;
+  gap: 15px;
+  margin: 30px 0 20px 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.fg-btn {
+  padding: 16px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 200px;
+}
+
+.fg-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.fg-btn:active {
+  transform: translateY(0);
+}
+
+.fg-btn-primary {
+  background: #1976d2;
+  color: white;
+}
+
+.fg-btn-primary:hover {
+  background: #1565c0;
+}
+
+.fg-btn-danger {
+  background: transparent;
+  color: #d32f2f;
+  border: 2px solid #d32f2f;
+}
+
+.fg-btn-danger:hover {
+  background: rgba(211, 47, 47, 0.08);
+}
+
+.flash-guardian-wcag {
+  color: #9e9e9e;
+  font-size: 12px;
+  margin: 20px 0 0 0;
+  font-style: italic;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 600px) {
+  .flash-guardian-content {
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .flash-guardian-content h2 {
+    font-size: 24px;
+  }
+
+  .flash-guardian-message {
+    font-size: 16px;
+  }
+
+  .flash-guardian-buttons {
+    flex-direction: column;
+  }
+
+  .fg-btn {
+    min-width: 100%;
+  }
+}
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  #flash-guardian-overlay,
+  .flash-guardian-content,
+  .flash-guardian-icon {
+    animation: none;
+  }
+}
