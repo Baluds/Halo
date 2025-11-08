@@ -41,7 +41,7 @@ The extension monitors videos using these steps:
 5. The extension icon will appear in your toolbar
 6. Refresh any open video pages to activate protection
 
-## 🚀 Usage
+## Usage
 
 ### Normal Browsing
 
