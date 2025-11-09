@@ -316,16 +316,20 @@ document.getElementById('aiProvider').addEventListener('change', (e) => {
   if (provider === 'gemini') {
     document.getElementById('geminiKeySection').style.display = 'block';
     document.getElementById('groqKeySection').style.display = 'none';
-  } else {
+  } else if (provider === 'groq') {
     document.getElementById('geminiKeySection').style.display = 'none';
     document.getElementById('groqKeySection').style.display = 'block';
+  } else if (provider === 'elevenlabs') {
+    document.getElementById('geminiKeySection').style.display = 'none';
+    document.getElementById('groqKeySection').style.display = 'none';
+    document.getElementById('elevenLabsKeySection').style.display = 'block';
   }
 });
 
 // Settings Modal Functions
 function openSettingsModal() {
   // Load existing settings
-  chrome.storage.sync.get(['aiProvider', 'geminiApiKey', 'groqApiKey'], (data) => {
+    chrome.storage.sync.get(['aiProvider', 'geminiApiKey', 'groqApiKey', 'elevenLabsApiKey', 'voiceId'], (data) => {
     // Set provider
     const provider = data.aiProvider || 'gemini';
     document.getElementById('aiProvider').value = provider;
@@ -339,6 +343,12 @@ function openSettingsModal() {
     }
     if (data.groqApiKey) {
       document.getElementById('groqApiKeyInput').value = data.groqApiKey;
+    }
+    if (data.elevenLabsApiKey) {
+      document.getElementById('elevenLabsApiKeyInput').value = data.elevenLabsApiKey;
+    }
+    if (data.voiceId) {
+      document.getElementById('voiceSelect').value = data.voiceId || 'JBFqnCBsd6RMkjVDRZzb';
     }
   });
   document.getElementById('settingsModal').classList.add('active');
@@ -354,6 +364,9 @@ document.getElementById('saveSettings').addEventListener('click', () => {
   const provider = document.getElementById('aiProvider').value;
   const geminiKey = document.getElementById('apiKeyInput').value.trim();
   const groqKey = document.getElementById('groqApiKeyInput').value.trim();
+  const elevenLabsKey = document.getElementById('elevenLabsApiKeyInput').value.trim();
+  const voiceId = document.getElementById('voiceSelect').value;
+
 
   // Validate based on provider
   if (provider === 'gemini' && !geminiKey) {
@@ -369,7 +382,9 @@ document.getElementById('saveSettings').addEventListener('click', () => {
   chrome.storage.sync.set({
     aiProvider: provider,
     geminiApiKey: geminiKey,
-    groqApiKey: groqKey
+    groqApiKey: groqKey,
+    elevenLabsApiKey: elevenLabsKey,
+    voiceId: voiceId
   }, () => {
     closeSettingsModal();
     // Show success message
@@ -512,3 +527,19 @@ async function summarizeWithGroq(prompt, apiKey) {
   const data = await response.json();
   return data.choices[0].message.content;
 }
+
+// Open in Web App button - redirect to companion website
+document.getElementById('openWebAppBtn').addEventListener('click', () => {
+    const textInput = document.getElementById('textInput').value.trim();
+    const type = document.getElementById('summaryType').value;
+    
+    // If there's text, pass it to the web app via URL parameters
+    if (textInput) {
+        const encodedText = encodeURIComponent(textInput);
+        const url = `app.html?text=${encodedText}&type=${type}`;
+        chrome.tabs.create({ url: chrome.runtime.getURL(url) });
+    } else {
+        // If no text, just open the web app
+        chrome.tabs.create({ url: chrome.runtime.getURL('app.html') });
+    }
+});

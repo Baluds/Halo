@@ -34,7 +34,8 @@
   ],
   "host_permissions": [
     "https://generativelanguage.googleapis.com/*",
-    "https://api.groq.com/*"
+    "https://api.groq.com/*",
+    "https://api.elevenlabs.io/*"
   ],
   "action": {
     "default_popup": "popup.html",
@@ -50,9 +51,9 @@
     "128": "icons/icon128.png"
   },
   "web_accessible_resources": [
-    {
-      "resources": ["icons/warning.png"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  {
+    "resources": ["app.html", "app.css", "app.js", "icons/warning.png"],
+    "matches": ["<all_urls>"]
+  }
+]
 }
