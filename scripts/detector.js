@@ -748,7 +748,7 @@ class FlashDetector {
         const videos = document.querySelectorAll('video');
         videos.forEach(video => {
           video.pause();
-          video.currentTime = 0;
+          // Keep video at current position instead of resetting
         });
         overlay.style.display = 'none';
 
