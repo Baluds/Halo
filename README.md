@@ -4,14 +4,14 @@ A dual-purpose Chrome browser extension for accessibility built for HackUmass 20
 
 **Halo** combines two powerful accessibility features:
 1. **Flash Protection**: Protects people with photosensitive epilepsy by detecting flashing content in videos
-2. **Text Summarizer**: AI-powered article summarization for people with ADHD/ADD
+2. **Text Summarizer**: AI-powered article summarization for people with ADHD/ADD with Audiobook support
 
 ## Project Overview
 
 Halo is a Manifest V3 Chrome extension that serves two different user groups with distinct accessibility needs:
 
 - **For photosensitive users**: Real-time flash detection that monitors video content and automatically pauses when dangerous flashing patterns are detected (≥3 flashes per second), following WCAG 2.1 standards
-- **For users with ADHD/ADD**: AI-powered text summarization using Google Gemini or Groq APIs to condense long articles into digestible summaries
+- **For users with ADHD/ADD**: AI-powered text summarization using Google Gemini to condense long articles into digestible summaries
 
 All video processing happens locally in your browser for complete privacy. The extension features a clean popup interface that allows users to toggle between the two modes and customize their experience.
 
@@ -22,6 +22,12 @@ Halo monitors videos on YouTube, TikTok, Twitter/X, Instagram, and Twitch. When 
 
 ### Text Summarizer
 Condenses long articles and blog posts into easy-to-read summaries using Google's Gemini AI. Helps users with ADHD/ADD quickly grasp key information without reading lengthy content.
+
+### Multilingual tts 
+Uses ElevenLabs Multilingual Model for text to speech for narration of summaries
+
+### White Noise
+Can play multiple soothing white noise to boost concentration
 
 ## Features
 
@@ -38,6 +44,8 @@ Condenses long articles and blog posts into easy-to-read summaries using Google'
 - **Flexible Length**: Choose brief (2-3 sentences), moderate (1 paragraph), or detailed (bullet points)
 - **Smart Extraction**: Automatically finds and extracts main article content
 - **Copy to Clipboard**: Easy sharing of summaries
+- **Download Summary** Download summary as a txt file
+- **TTS Support** Narrate summaries in 10 different voices/tones
 - **Works Everywhere**: Summarize articles on any website
 
 ## Technical Architecture
@@ -48,7 +56,7 @@ Condenses long articles and blog posts into easy-to-read summaries using Google'
   - `summarizer.js` - Text summarization functionality (works on all websites)
 - **Background Worker**: `background.js` - Manages extension lifecycle and communication
 - **Popup Interface**: `popup.html` + `popup.js` - User settings, statistics, and controls
-- **AI Integration**: Supports Google Gemini and Groq APIs for intelligent text summarization
+- **AI Integration**: Supports Google Gemini for intelligent text summarization and ElevenLabs API for tts
 
 ## How It Works
 
@@ -56,7 +64,7 @@ Condenses long articles and blog posts into easy-to-read summaries using Google'
 
 The extension monitors videos using these steps:
 
-1. **Captures frames** from playing videos using the Canvas API
+1. **Captures frames** from playing videos
 2. **Calculates brightness** of each frame using WCAG 2.1 luminance formulas
 3. **Detects flashes** by tracking significant brightness changes between frames
 4. **Counts frequency** - if 3+ flashes occur within 1 second, it triggers a warning
@@ -80,7 +88,7 @@ The extension monitors videos using these steps:
 1. Download or clone this repository
 2. Open Chrome and go to `chrome://extensions/`
 3. Enable "Developer mode" in the top-right corner
-4. Click "Load unpacked" and select the `flash-guardian` folder
+4. Click "Load unpacked" and select the `Halo` folder
 5. The extension icon will appear in your toolbar
 6. Refresh any open video pages to activate protection
 
@@ -111,9 +119,6 @@ The extension monitors videos using these steps:
 3. Choose your AI provider:
    - **Google Gemini** (Recommended): Fast, high-quality summaries
      - Get free API key: [Google AI Studio](https://aistudio.google.com/app/apikey)
-   - **Groq** (Free Alternative): Very fast, good quality with Llama models
-     - Get free API key: [Groq Console](https://console.groq.com/keys)
-     - Free tier: 30 requests/min
 4. Paste your API key and click "Save"
 
 **Using the Summarizer:**
@@ -130,18 +135,12 @@ The extension monitors videos using these steps:
 8. Wait for AI to create your summary
 9. Use "Copy" button to copy summary to clipboard
 
+**Using the Text to Speech:**
+1. Add your ElevenLabs API Key
+2. Select the voice
+3. Click on listen
+
 **Switching Between Views:**
 - Click the 🛡️ or 📝 icon in the top-right of the popup to toggle between Flash Protection and Text Summarizer
-
-### Console Logging
-
-Open DevTools (F12) → Console to see detection activity:
-```
-[Halo] Content script loaded
-[Halo] Found 1 video(s) on page
-[Halo] Initialized detector for video
-[Halo] Started monitoring video
-[Halo] Detection state reset
-```
 
 Built for HackUmass 2025
