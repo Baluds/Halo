@@ -186,6 +186,22 @@ document.getElementById('musicBtn').addEventListener('click', () => {
   }
 });
 
+// Rocket button - opens web app
+document.getElementById('rocketBtn').addEventListener('click', () => {
+  const textInput = document.getElementById('textInput').value.trim();
+  const type = document.getElementById('summaryType').value;
+
+  // If there's text, pass it to the web app via URL parameters
+  if (textInput) {
+    const encodedText = encodeURIComponent(textInput);
+    const url = `app.html?text=${encodedText}&type=${type}`;
+    chrome.tabs.create({ url: chrome.runtime.getURL(url) });
+  } else {
+    // If no text, just open the web app
+    chrome.tabs.create({ url: chrome.runtime.getURL('app.html') });
+  }
+});
+
 // Load settings from storage
 chrome.storage.sync.get(['enabled', 'autoPause'], (data) => {
   // Set toggle state for enable protection
@@ -623,20 +639,3 @@ async function summarizeWithGemini(prompt, apiKey) {
   const data = await response.json();
   return data.candidates[0].content.parts[0].text;
 }
-
-
-// Open in Web App button - redirect to companion website
-document.getElementById('openWebAppBtn').addEventListener('click', () => {
-    const textInput = document.getElementById('textInput').value.trim();
-    const type = document.getElementById('summaryType').value;
-    
-    // If there's text, pass it to the web app via URL parameters
-    if (textInput) {
-        const encodedText = encodeURIComponent(textInput);
-        const url = `app.html?text=${encodedText}&type=${type}`;
-        chrome.tabs.create({ url: chrome.runtime.getURL(url) });
-    } else {
-        // If no text, just open the web app
-        chrome.tabs.create({ url: chrome.runtime.getURL('app.html') });
-    }
-});
