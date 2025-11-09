@@ -520,6 +520,7 @@ function closeSettingsModal() {
 // Save settings
 document.getElementById('saveSettings').addEventListener('click', () => {
   const provider = document.getElementById('aiProvider').value;
+  console.log('[Halo] Saving settings for provider:', provider);
   const geminiKey = document.getElementById('apiKeyInput').value.trim();
   const elevenLabsKey = document.getElementById('elevenLabsApiKeyInput').value.trim();
   const voiceId = document.getElementById('voiceSelect').value;
@@ -546,10 +547,11 @@ document.getElementById('saveSettings').addEventListener('click', () => {
     closeSettingsModal();
     // Show success message
     if (currentView === 'summarizer') {
+      console.log('[Halo] Settings saved successfully: ', aiProvider);
       document.getElementById('summaryError').style.background = '#d4edda';
       document.getElementById('summaryError').style.borderColor = '#28a745';
       document.getElementById('summaryError').style.color = '#155724';
-      errormsg = aiProvider === 'gemini' ? `✓ Gemini API key saved! You can now generate summaries.` : `✓ ElevenLabs API key saved! You can now use Text-to-Speech.`;
+      errormsg = provider === 'gemini' ? `✓ Gemini API key saved! You can now generate summaries.` : `✓ ElevenLabs API key saved! You can now use Text-to-Speech.`;
       showError(errormsg);
       setTimeout(() => {
         document.getElementById('summaryError').style.display = 'none';

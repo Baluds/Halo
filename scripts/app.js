@@ -486,7 +486,7 @@ function handleSaveSettings() {
         document.getElementById('summaryError').style.background = '#d4edda';
         document.getElementById('summaryError').style.borderColor = '#28a745';
         document.getElementById('summaryError').style.color = '#155724';
-        errormsg = aiProvider === 'gemini' ? `✓ Gemini API key saved! You can now generate summaries.` : `✓ ElevenLabs API key saved! You can now use Text-to-Speech.`;
+        errormsg = provider === 'gemini' ? `✓ Gemini API key saved! You can now generate summaries.` : `✓ ElevenLabs API key saved! You can now use Text-to-Speech.`;
         showInfo(errormsg);
         setTimeout(() => {
             document.getElementById('summaryError').style.display = 'none';
