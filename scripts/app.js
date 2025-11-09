@@ -261,13 +261,13 @@ async function generateSummary() {
   }
 
   // Check which provider is configured
-  chrome.storage.sync.get(['aiProvider', 'geminiApiKey', 'groqApiKey', 'elevenLabsApiKey', 'voiceId'], async (data) => {
+  chrome.storage.sync.get(['aiProvider', 'geminiApiKey', 'elevenLabsApiKey', 'voiceId'], async (data) => {
     const provider = data.aiProvider || 'gemini';
-    const apiKey = provider === 'gemini' ? data.geminiApiKey : data.groqApiKey;
+    const apiKey = data.geminiApiKey;
     
 
     if (!apiKey) {
-      showError(`Please configure your ${provider === 'gemini' ? 'Gemini' : 'Groq'} API key first. Click the ⚙️ settings icon at the top.`);
+      showError(`Please configure your Gemini API key first. Click the ⚙️ settings icon at the top.`);
       return;
     }
 
@@ -302,10 +302,10 @@ async function handleGenerate() {
     // Get settings
     const settings = getSettings();
     const provider = settings.aiProvider || 'gemini';
-    const apiKey = provider === 'gemini' ? settings.geminiApiKey : settings.groqApiKey;
+    const apiKey =  settings.geminiApiKey ;
     
     if (!apiKey) {
-        showError(`Please configure your ${provider === 'gemini' ? 'Gemini' : 'Groq'} API key first. Click the Settings button at the top.`);
+        showError(`Please configure your Gemini API key first. Click the Settings button at the top.`);
         return;
     }
     
@@ -389,7 +389,6 @@ function openSettingsModal() {
     // Load current settings
     document.getElementById('aiProvider').value = settings.aiProvider || 'gemini';
     document.getElementById('apiKeyInput').value = settings.geminiApiKey || '';
-    document.getElementById('groqApiKeyInput').value = settings.groqApiKey || '';
     // document.getElementById('elevenLabsApiKeyInput').value = settings.elevenLabsApiKey || '';
     // document.getElementById('voiceSelect').value = settings.voiceId || 'JBFqnCBsd6RMkjVDRZzb';
     
@@ -405,7 +404,6 @@ function closeSettingsModal() {
     
     // Clear password fields
     document.getElementById('apiKeyInput').value = '';
-    document.getElementById('groqApiKeyInput').value = '';
 }
 
 function handleProviderChange() {
@@ -413,13 +411,8 @@ function handleProviderChange() {
     
     if (provider === 'gemini') {
     document.getElementById('geminiKeySection').style.display = 'block';
-    document.getElementById('groqKeySection').style.display = 'none';
-  } else if (provider === 'groq') {
-    document.getElementById('geminiKeySection').style.display = 'none';
-    document.getElementById('groqKeySection').style.display = 'block';
   } else if (provider === 'elevenlabs') {
     document.getElementById('geminiKeySection').style.display = 'none';
-    document.getElementById('groqKeySection').style.display = 'none';
     document.getElementById('elevenLabsKeySection').style.display = 'block';
   }
 }
@@ -427,7 +420,6 @@ function handleProviderChange() {
 function handleSaveSettings() {
     const provider = document.getElementById('aiProvider').value;
     const geminiKey = document.getElementById('apiKeyInput').value.trim();
-    const groqKey = document.getElementById('groqApiKeyInput').value.trim();
     const elevenLabsKey = document.getElementById('elevenLabsApiKeyInput').value.trim();
     const voiceId = document.getElementById('voiceSelect').value;
     
@@ -437,16 +429,11 @@ function handleSaveSettings() {
         return;
     }
     
-    if (provider === 'groq' && !groqKey) {
-        alert('Please enter a Groq API key');
-        return;
-    }
     
     // Save to localStorage
     const settings = {
         aiProvider: provider,
         geminiApiKey: geminiKey,
-        groqApiKey: groqKey,
         elevenLabsApiKey: elevenLabsKey,
         voiceId: voiceId
     };
@@ -456,7 +443,7 @@ function handleSaveSettings() {
     closeSettingsModal();
     
     // Show success message
-    const successMsg = `✓ ${provider === 'gemini' ? 'Gemini' : 'Groq'} API key saved! You can now generate summaries.`;
+    const successMsg = `✓ Gemini API key saved! You can now generate summaries.`;
     document.getElementById('summaryError').style.background = '#d4edda';
     document.getElementById('summaryError').style.borderColor = '#28a745';
     document.getElementById('summaryError').style.color = '#155724';
@@ -504,8 +491,6 @@ async function summarizeText(text, type, apiKey, provider = 'gemini') {
     
     if (provider === 'gemini') {
         summary = await summarizeWithGemini(prompt, apiKey);
-    } else if (provider === 'groq') {
-        summary = await summarizeWithGroq(prompt, apiKey);
     } else {
         throw new Error('Unknown AI provider: ' + provider);
     }
@@ -541,33 +526,6 @@ async function summarizeWithGemini(prompt, apiKey) {
     return data.candidates[0].content.parts[0].text;
 }
 
-// Groq API
-async function summarizeWithGroq(prompt, apiKey) {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'llama-3.1-70b-versatile',
-            messages: [{
-                role: 'user',
-                content: prompt
-            }],
-            temperature: 0.7,
-            max_tokens: 1000
-        })
-    });
-    
-    if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.error?.message || `Groq API error: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data.choices[0].message.content;
-}
 
 // Remove markdown formatting
 function cleanMarkdown(text) {
