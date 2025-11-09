@@ -494,7 +494,7 @@ function openSettingsModal() {
       document.getElementById('elevenLabsApiKeyInput').value = data.elevenLabsApiKey;
     }
     if (data.voiceId) {
-      document.getElementById('voiceSelect').value = data.voiceId || 'JBFqnCBsd6RMkjVDRZzb';
+      document.getElementById('voiceSelect').value = data.voiceId || 'AeRdCCKzvd23BpJoofzx';
     }
   });
   document.getElementById('settingsModal').classList.add('active');
