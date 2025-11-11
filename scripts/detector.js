@@ -736,6 +736,15 @@ function speakWarning(flashCount) {
       // Add event listeners
       document.getElementById('halo-continue').addEventListener('click', () => {
         const videos = document.querySelectorAll('video');
+        // Stop any speech warnings before resuming playback
+        try {
+          if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function') {
+            window.speechSynthesis.cancel();
+          }
+        } catch (e) {
+          // Ignore if speechSynthesis isn't available or cancel fails
+        }
+
         videos.forEach(video => {
           const detector = detectors.get(video);
           if (detector) {
@@ -743,6 +752,7 @@ function speakWarning(flashCount) {
             video.play();
           }
         });
+
         overlay.style.display = 'none';
       });
 
@@ -752,6 +762,15 @@ function speakWarning(flashCount) {
           video.pause();
           // Keep video at current position instead of resetting
         });
+        // Stop any speech warnings when pausing the video
+        try {
+          if (window.speechSynthesis && typeof window.speechSynthesis.cancel === 'function') {
+            window.speechSynthesis.cancel();
+          }
+        } catch (e) {
+          // Ignore if speechSynthesis isn't available or cancel fails
+        }
+
         overlay.style.display = 'none';
 
         // Optionally close the tab or go back

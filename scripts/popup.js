@@ -90,11 +90,6 @@ function startAudio(soundType = 'meditation') {
       action: 'startAudio',
       soundFile: audioFile
     }, (response) => {
-      if (response && response.success) {
-  // Debug: playing sound (omitted)
-      } else {
-        console.error('[Halo] Error playing audio:', response?.error);
-      }
     });
 
   } catch (error) {
